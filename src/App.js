@@ -8,10 +8,14 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isCallDisabled: false, localStream:undefined};
+    this.state = {isStartDisabled: false, isCallDisabled: true, localStream: undefined};
   }
 
   componentDidMount() {
+    this.initPeerConnection();
+  }
+
+  initPeerConnection = () =>{
     this.localPeer = new RTCPeerConnection(null);
     this.localPeer.addEventListener('icecandidate', this.handleConnection);
     this.remotePeer = new RTCPeerConnection(null);
@@ -38,6 +42,7 @@ class App extends Component {
 
   handleStartClick = () => {
     this.setState({isStartDisabled: true});
+    this.setState({isCallDisabled: false});
     navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true
@@ -54,6 +59,7 @@ class App extends Component {
   handleCallClick = () => {
     this.setState({isCallDisabled: true});
 
+    this.initPeerConnection();
     this.localPeer.addStream(this.state.localStream);
 
     const offerOptions = {
@@ -87,6 +93,17 @@ class App extends Component {
     return (pc === this.localPeer) ? this.remotePeer : this.localPeer;
   }
 
+  handleStopClick = () => {
+    this.localPeer.close();
+    this.remotePeer.close();
+    this.localPeer = undefined;
+    this.remotePeer = undefined;
+
+    this.setState({localStream: undefined});
+    this.setState({isStartDisabled: false});
+    this.setState({isCallDisabled: true});
+  }
+
   render() {
     return (
       <div className="App">
@@ -105,7 +122,7 @@ class App extends Component {
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>
           <button id="callButton" className="actionButton" onClick={this.handleCallClick} disabled={this.state.isCallDisabled}>Call</button>
-          <button id="hangupButton" className="actionButton">Hang Up</button>
+          <button id="hangupButton" className="actionButton" onClick={this.handleStopClick}>Hang Up</button>
         </div>
       </div>
     );
