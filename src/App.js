@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {saveStream} from './utility';
 
 class App extends Component {
   localPeer;
@@ -12,7 +13,10 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.initPeerConnection();
+    if (window.dbAccess) {
+      // access indexedDB
+      window.dbAccess.createDB();
+    }
   }
 
   initPeerConnection = () =>{
@@ -47,13 +51,17 @@ class App extends Component {
       audio: true,
       video: true
     })
-    .then((stream)=>{
-      this.setState({localStream: stream});
-      this.localVideo.srcObject = this.state.localStream;
-    })
+    .then(this.handleSuccess)
     .catch(function(e) {
       alert('getUserMedia() error: ' + e.name);
     });
+  }
+
+  handleSuccess = (stream) => {
+    saveStream(stream);
+
+    this.setState({localStream: stream});
+    this.localVideo.srcObject = this.state.localStream;
   }
 
   handleCallClick = () => {
