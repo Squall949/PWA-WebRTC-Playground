@@ -9,7 +9,7 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isCallDisabled: true, localStream: undefined};
+    this.state = {isStartDisabled: false, isCallDisabled: true, isHangUpDisabled: true, localStream: undefined};
   }
 
   componentDidMount() {
@@ -66,6 +66,7 @@ class App extends Component {
 
   handleCallClick = () => {
     this.setState({isCallDisabled: true});
+    this.setState({isHangUpDisabled: false});
 
     this.initPeerConnection();
     this.localPeer.addStream(this.state.localStream);
@@ -110,6 +111,7 @@ class App extends Component {
     this.setState({localStream: undefined});
     this.setState({isStartDisabled: false});
     this.setState({isCallDisabled: true});
+    this.setState({isHangUpDisabled: true});
   }
 
   render() {
@@ -130,7 +132,7 @@ class App extends Component {
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>
           <button id="callButton" className="actionButton" onClick={this.handleCallClick} disabled={this.state.isCallDisabled}>Call</button>
-          <button id="hangupButton" className="actionButton" onClick={this.handleStopClick}>Hang Up</button>
+          <button id="hangupButton" className="actionButton" onClick={this.handleStopClick} disabled={this.state.isHangUpDisabled}>Hang Up</button>
         </div>
       </div>
     );
