@@ -12,7 +12,15 @@ function saveStream(stream) {
     mediaRecorder.addEventListener('stop', function() {
         // save to indexedDb
         if ('indexedDB' in window && window.dbAccess){
-            window.dbAccess.writeData('stream', {id: 'tmpRecord', stream: new Blob(recordedChunks)});
+            window.dbAccess.writeData('stream', {id: 'tmpRecord', stream: new Blob(recordedChunks)})
+            .then(() => {
+                // trigger sw's sync event
+                if('serviceWorker' in navigator && 'SyncManager' in window){
+                    navigator.serviceWorker.ready.then(function(swRegistration) {
+                        swRegistration.sync.register('save-stream');
+                    });
+                }
+            });
         }
     });  
 

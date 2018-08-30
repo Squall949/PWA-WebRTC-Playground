@@ -15,8 +15,26 @@
                     stream.put(data);
                     return transaction.complete;
                 });
+        },
+        readData: function(table) {
+            return this.dbPromise
+                .then(function(db){
+                    var transaction = db.transaction(table, 'readonly');
+                    var stream = transaction.objectStore(table);
+                    return stream.getAll();
+                });
+        },
+        saveToFirebase: function() {
+            this.readData('stream').then(function(data) {
+                if (data && data.length) {
+                    firebase.storage().ref().child('stream.mp4').put(data[0].stream, { contentType : 'video/mp4' }).then(function(snapshot) {
+                        console.log('Uploaded a blob!');
+                    });
+                }
+            });
         }
     };
 
+    dbAccess.createDB();
     self['dbAccess'] = dbAccess;
 })();

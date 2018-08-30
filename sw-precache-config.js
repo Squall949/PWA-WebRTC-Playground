@@ -7,7 +7,7 @@ module.exports = {
     ],
     swFilePath: './build/service-worker.js',
     stripPrefix: 'build/',
-    importScripts: ['./vendor/idb.js', './custom/sw.js', './custom/db.js'],
+    importScripts: ['./vendor/idb.js', './custom/sw.js', './vendor/fire.js','./custom/db.js', './vendor/polyfill.js'],
     handleFetch: false,
     runtimeCaching: [{
       urlPattern: /this\\.is\\.a\\.regex/,

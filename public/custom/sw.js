@@ -1,16 +1,5 @@
-self.addEventListener('activate', function(event) {
-    event.waitUntil(
-        self.dbAccess.createDB()
-    );
-  });
-
-self.addEventListener('sync', function (e) {
+self.addEventListener('sync', function (event) {
     if (event.tag == 'save-stream') {
-        event.waitUntil(saveToFirebase());
+        event.waitUntil(self.dbAccess.saveToFirebase());
     }
 });
-
-// save to firebase
-function saveToFirebase() {
-
-}

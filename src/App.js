@@ -13,10 +13,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    if (window.dbAccess) {
-      // access indexedDB
-      window.dbAccess.createDB();
-    }
+   
   }
 
   initPeerConnection = () =>{
