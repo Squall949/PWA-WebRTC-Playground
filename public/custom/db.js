@@ -29,6 +29,16 @@
                 if (data && data.length) {
                     firebase.storage().ref().child('stream.mp4').put(data[0].stream, { contentType : 'video/mp4' }).then(function(snapshot) {
                         console.log('Uploaded a blob!');
+                        // Generating Push Message
+                        var functions = firebase.functions();
+                        var doPush = firebase.functions().httpsCallable('doPush');
+                        
+                        doPush().then(function(result) {
+                            console.log("Push Created!");
+                        })
+                        .catch(function(error) {
+                            console.log(error);
+                        });
                     });
                 }
             });

@@ -1,5 +1,7 @@
-importScripts('/__/firebase/5.4.1/firebase-app.js');
-importScripts('/__/firebase/5.4.1/firebase-storage.js');
+importScripts('https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js');
+importScripts('https://www.gstatic.com/firebasejs/5.4.1/firebase-storage.js');
+importScripts('https://www.gstatic.com/firebasejs/5.4.1/firebase-database.js');
+importScripts('https://www.gstatic.com/firebasejs/5.4.1/firebase-functions.js');
 
 // Initialize Firebase
 var fireBaseConfig = {

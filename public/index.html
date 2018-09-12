@@ -37,21 +37,11 @@
       To create a production bundle, use `npm run build` or `yarn build`.
     -->
     <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-storage.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/5.4.1/firebase-database.js"></script>
     <script src="./vendor/idb.js"></script>
     <script src="./custom/db.js"></script>
-    <script src="/__/firebase/5.4.1/firebase-app.js"></script>
-    <script src="/__/firebase/5.4.1/firebase-storage.js"></script>
-    <script>
-      // Initialize Firebase
-      var fireBaseConfig = {
-        apiKey: "AIzaSyA0_0VRb3kRK--N5_FFzpARXkvVCy_VfOw",
-        authDomain: "pwa-webrtc-16283.firebaseapp.com",
-        databaseURL: "https://pwa-webrtc-16283.firebaseio.com",
-        projectId: "pwa-webrtc-16283",
-        storageBucket: "pwa-webrtc-16283.appspot.com",
-        messagingSenderId: "39641803214"
-      };
-      firebase.initializeApp(fireBaseConfig);
-    </script>
+    <script src="./custom/init.js"></script>
   </body>
 </html>
