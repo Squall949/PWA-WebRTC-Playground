@@ -20,6 +20,7 @@
           });          
     }
     else {
+      setPushSubscribe();
     }
   }
 
@@ -35,32 +36,35 @@
         })
         .then(function(sub) {
             if (sub === null) {
-              return reg.pushManager.subscribe({
-                userVisibleOnly: true,
-                applicationServerKey: urlBase64ToUint8Array('BKeua3D7TfNiWARTtyDHfFLBp9mBLI-qHSrvfL2myus5xnj9Jv9ujTs1fFjxx8qRbbWtgUwcJVyc7BdYEnCR_vI')
-              });
+              return doSubscribe(reg);
             }
             else {
-              
+              return sub.unsubscribe().then(function() {
+                console.log('successfully unsubscribed');
+                // to refresh subscription
+                return doSubscribe(reg);
+              });
             }
         })
         .then(function(newSub) {
-          return fetch('https://pwa-webrtc-16283.firebaseio.com/subscriptions.json', {
-              method: 'POST',
-              headers: {
-                  'Content-TYpe': 'application/json',
-                  'Accept': 'application/json'
-              },
-              body: JSON.stringify(newSub)
-          });
+          return firebase.database().ref('subscriptions').set(newSub.toJSON());
         })
-        .then(function(response) {
-          if (response.ok)
+        .then(function() {
+          if ('Notification' in window && Notification.permission !== "granted")
             new Notification('Successfully Subscribe');
+
+          console.log('Successfully Subscribe');
         })
         .catch(function(err) {
           console.log(err);
         });
+  }
+
+  function doSubscribe(reg) {
+    return reg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: urlBase64ToUint8Array('BKeua3D7TfNiWARTtyDHfFLBp9mBLI-qHSrvfL2myus5xnj9Jv9ujTs1fFjxx8qRbbWtgUwcJVyc7BdYEnCR_vI')
+    });
   }
 
   function urlBase64ToUint8Array(base64String){

@@ -12,27 +12,28 @@ const webpush = require('web-push');
 admin.initializeApp();
 
 exports.doPush = functions.https.onCall((data, context) => {
-    admin.database().ref('subscriptions').once('value').then(function(subs) {
-        subs.forEach(function(sub) {
-            webpush.setVapidDetails(
-                'mailto:webber949@gmail.com',
-                'BKeua3D7TfNiWARTtyDHfFLBp9mBLI-qHSrvfL2myus5xnj9Jv9ujTs1fFjxx8qRbbWtgUwcJVyc7BdYEnCR_vI',
-                '73Ol_9aNCgC_T1jV1B2-UkXUos5xVjYsJs_8QErguQs'
-            );
+    return admin.database().ref('subscriptions').once('value').then(function(sub) {
+        webpush.setVapidDetails(
+            'mailto:webber949@gmail.com',
+            'BKeua3D7TfNiWARTtyDHfFLBp9mBLI-qHSrvfL2myus5xnj9Jv9ujTs1fFjxx8qRbbWtgUwcJVyc7BdYEnCR_vI',
+            '73Ol_9aNCgC_T1jV1B2-UkXUos5xVjYsJs_8QErguQs'
+        );
 
-            var pushConfig = {
-                endpoint: sub.val().endpoint,
-                keys: {
-                    auth: sub.val().keys.auth,
-                    p256dh: sub.val().keys.p256dh
-                }
-            };
-            webpush.sendNotification(pushConfig, 
-                JSON.stringify({title: 'Watch my offline stream', content: 'enjoy it!'})
-            )
-            .catch(function(err) {
-                console.log('Creating Push failed', err);
-            });
+        var pushConfig = {
+            endpoint: sub.val().endpoint,
+            keys: {
+                auth: sub.val().keys.auth,
+                p256dh: sub.val().keys.p256dh
+            }
+        };
+        return webpush.sendNotification(pushConfig, 
+            JSON.stringify({title: 'Watch my offline stream', content: 'enjoy it!'})
+        )
+        .then(function() {
+            return {successful: "successful"};
+        })
+        .catch(function(err) {
+            console.log('Creating Push failed', err);
         });
     });
 });

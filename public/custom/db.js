@@ -34,7 +34,7 @@
                         var doPush = firebase.functions().httpsCallable('doPush');
                         
                         doPush().then(function(result) {
-                            console.log("Push Created!");
+                            console.log(`${result.data.successful}! Push Created.`);
                         })
                         .catch(function(error) {
                             console.log(error);
