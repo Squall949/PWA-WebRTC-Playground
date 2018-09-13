@@ -55,7 +55,9 @@ class App extends Component {
   }
 
   handleSuccess = (stream) => {
-    saveStream(stream);
+    // when user is offline, recording the stream
+    if (!window.navigator.onLine)
+      saveStream(stream);
 
     this.setState({localStream: stream});
     this.localVideo.srcObject = this.state.localStream;
