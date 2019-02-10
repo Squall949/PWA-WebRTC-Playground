@@ -4,8 +4,8 @@ import './App.css';
 import {saveStream} from './utility';
 
 class App extends Component {
-  localPeer;
-  remotePeer;
+  peerConnection;
+  serverConnection;
 
   constructor() {
     super();
@@ -13,37 +13,9 @@ class App extends Component {
   }
 
   componentDidMount() {
-   
-  }
+    this.serverConnection = new WebSocket(`ws://${window.location.hostname}:8000`);
+    this.serverConnection.onmessage = this.gotMessageFromServer;
 
-  initPeerConnection = () =>{
-    this.localPeer = new RTCPeerConnection(null);
-    this.localPeer.addEventListener('icecandidate', this.handleConnection);
-    this.remotePeer = new RTCPeerConnection(null);
-    this.remotePeer.addEventListener('icecandidate', this.handleConnection);
-    this.remotePeer.onaddstream = (e) => this.remoteVideo.srcObject = e.stream;
-  }
-
-  handleConnection = (event) => {
-    const peerConnection = event.target;
-    const iceCandidate = event.candidate;
-  
-    if (iceCandidate) {
-      const newIceCandidate = new RTCIceCandidate(iceCandidate);
-      const otherPeer = this.getOtherPeer(peerConnection);
-  
-      otherPeer.addIceCandidate(newIceCandidate)
-        .then(() => {
-          // success
-        }).catch((error) => {
-          // failure
-        });
-    }
-  }
-
-  handleStartClick = () => {
-    this.setState({isStartDisabled: true});
-    this.setState({isCallDisabled: false});
     navigator.mediaDevices.getUserMedia({
       audio: true,
       video: true
@@ -60,56 +32,89 @@ class App extends Component {
       saveStream(stream);
 
     this.setState({localStream: stream});
-    this.localVideo.srcObject = this.state.localStream;
+    this.localVideo.srcObject = stream;
   }
 
-  handleCallClick = () => {
-    this.setState({isCallDisabled: true});
+  initPeerConnection = () =>{
+    const peerConnectionConfig = {'iceServers': [{urls: `stun:${window.location.hostname}:8000`}]};
+    this.peerConnection = new RTCPeerConnection(peerConnectionConfig);
+    this.peerConnection.addEventListener('icecandidate', this.handleConnection);
+    this.peerConnection.addEventListener('track', this.gotRemoteStream);
+    this.peerConnection.addStream(this.state.localStream);
+  }
+
+  handleConnection = (event) => {
+    const iceCandidate = event.candidate;
+  
+    if (iceCandidate) {
+      this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
+    }
+  }
+
+  handleStartClick = () => {
+    this.setState({isStartDisabled: true});
     this.setState({isHangUpDisabled: false});
 
     this.initPeerConnection();
-    this.localPeer.addStream(this.state.localStream);
 
     const offerOptions = {
       offerToReceiveAudio: 1,
       offerToReceiveVideo: 1
     };
 
-    this.localPeer.createOffer(offerOptions)
-    .then(this.createdOffer).catch(this.setSessionDescriptionError);
+    this.peerConnection.createOffer(offerOptions).then(this.createDescription).catch(this.errorHandler);
   }
 
-  createdOffer = (description) => {
-    this.localPeer.setLocalDescription(description);
-    this.remotePeer.setRemoteDescription(description);
-
-    this.remotePeer.createAnswer()
-      .then(this.createdAnswer)
-      .catch(this.setSessionDescriptionError);
+  createDescription = (description) => {
+    this.peerConnection.setLocalDescription(description).then(() => {
+      this.serverConnection.send(JSON.stringify({'sdp': this.peerConnection.localDescription}));
+    }).catch(this.errorHandler);
   }
 
-  createdAnswer = (description) => {
-    this.remotePeer.setLocalDescription(description);
-    this.localPeer.setRemoteDescription(description);
-  }
-
-  setSessionDescriptionError(error) {
+  errorHandler(error) {
     console.log(error.toString());
   }
 
-  getOtherPeer(pc) {
-    return (pc === this.localPeer) ? this.remotePeer : this.localPeer;
+  gotMessageFromServer(message) {
+    if(!this.peerConnection) this.initPeerConnection();
+  
+    const signal = JSON.parse(message.data);
+  
+    if(signal.sdp) {
+      this.peerConnection.setRemoteDescription(new RTCSessionDescription(signal.sdp)).then(() => {
+        // Only create answers in response to offers
+        if(signal.sdp.type === 'offer') {
+          this.peerConnection.createAnswer().then(this.createDescription).catch(this.errorHandler);
+
+        }
+      }).catch(this.errorHandler);
+    } 
+    else if(signal.ice) {
+      this.peerConnection.addIceCandidate(new RTCIceCandidate(signal.ice)).catch(this.errorHandler);
+      this.setState({isStartDisabled: true});
+      this.setState({isHangUpDisabled: false});
+    }
+    else {
+      this.dismiss();
+    }
+  }
+
+  gotRemoteStream(event) {
+    this.remoteVideo.srcObject = event.streams[0];
   }
 
   handleStopClick = () => {
-    this.localPeer.close();
-    this.remotePeer.close();
-    this.localPeer = undefined;
-    this.remotePeer = undefined;
+    this.dismiss();
+
+    this.serverConnection.send(JSON.stringify({'dismiss': ''}));
+  }
+
+  dismiss = () => {
+    this.peerConnection.close();
+    this.peerConnection = undefined;
 
     this.setState({localStream: undefined});
     this.setState({isStartDisabled: false});
-    this.setState({isCallDisabled: true});
     this.setState({isHangUpDisabled: true});
   }
 
@@ -130,7 +135,6 @@ class App extends Component {
 
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>
-          <button id="callButton" className="actionButton" onClick={this.handleCallClick} disabled={this.state.isCallDisabled}>Call</button>
           <button id="hangupButton" className="actionButton" onClick={this.handleStopClick} disabled={this.state.isHangUpDisabled}>Hang Up</button>
         </div>
       </div>
