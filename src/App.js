@@ -36,7 +36,12 @@ class App extends Component {
   }
 
   initPeerConnection = () =>{
-    const peerConnectionConfig = {'iceServers': [{urls: `stun:${window.location.hostname}:8000`}]};
+    const peerConnectionConfig = {
+      'iceServers': [
+        {'urls': 'stun:stun.stunprotocol.org:3478'},
+        {'urls': 'stun:stun.l.google.com:19302'},
+      ]
+    };
     this.peerConnection = new RTCPeerConnection(peerConnectionConfig);
     this.peerConnection.addEventListener('icecandidate', this.handleConnection);
     this.peerConnection.addEventListener('track', this.gotRemoteStream);
