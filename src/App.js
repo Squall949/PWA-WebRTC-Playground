@@ -76,11 +76,11 @@ class App extends Component {
     }).catch(this.errorHandler);
   }
 
-  errorHandler(error) {
+  errorHandler = (error) => {
     console.log(error.toString());
   }
 
-  gotMessageFromServer(message) {
+  gotMessageFromServer = (message) => {
     if(!this.peerConnection) this.initPeerConnection();
   
     const signal = JSON.parse(message.data);
@@ -104,7 +104,7 @@ class App extends Component {
     }
   }
 
-  gotRemoteStream(event) {
+  gotRemoteStream = (event) => {
     this.remoteVideo.srcObject = event.streams[0];
   }
 
