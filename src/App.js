@@ -46,6 +46,8 @@ class App extends Component {
     this.peerConnection.addEventListener('icecandidate', this.handleConnection);
     this.peerConnection.addEventListener('track', this.gotRemoteStream);
     this.peerConnection.addStream(this.state.localStream);
+
+    console.log('init peerConn');
   }
 
   handleConnection = (event) => {
@@ -53,6 +55,7 @@ class App extends Component {
   
     if (iceCandidate) {
       this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
+      console.log('send iceCandidate');
     }
   }
 
@@ -72,6 +75,7 @@ class App extends Component {
   createDescription = (description) => {
     this.peerConnection.setLocalDescription(description).then(() => {
       this.serverConnection.send(JSON.stringify({'sdp': this.peerConnection.localDescription}));
+      console.log('send description');
     }).catch(this.errorHandler);
   }
 
@@ -89,7 +93,7 @@ class App extends Component {
         // Only create answers in response to offers
         if(signal.sdp.type === 'offer') {
           this.peerConnection.createAnswer().then(this.createDescription).catch(this.errorHandler);
-
+          console.log('create answer');
         }
       }).catch(this.errorHandler);
     } 
@@ -100,10 +104,12 @@ class App extends Component {
     }
     else {
       this.dismiss();
+      console.log('receive dismiss');
     }
   }
 
   gotRemoteStream = (event) => {
+    console.log(event);
     this.remoteVideo.srcObject = event.streams[0];
   }
 
@@ -111,6 +117,7 @@ class App extends Component {
     this.dismiss();
 
     this.serverConnection.send(JSON.stringify({'dismiss': ''}));
+    console.log('send dismiss');
   }
 
   dismiss = () => {
