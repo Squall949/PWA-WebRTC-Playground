@@ -9,7 +9,7 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isCallDisabled: true, isHangUpDisabled: true, localStream: undefined};
+    this.state = {isStartDisabled: false, isHangUpDisabled: true, localStream: undefined};
   }
 
   componentDidMount() {
@@ -17,7 +17,7 @@ class App extends Component {
     this.serverConnection.onmessage = this.gotMessageFromServer;
 
     navigator.mediaDevices.getUserMedia({
-      audio: true,
+      audio: false,
       video: true
     })
     .then(this.handleSuccess)
@@ -63,7 +63,6 @@ class App extends Component {
     this.initPeerConnection();
 
     const offerOptions = {
-      offerToReceiveAudio: 1,
       offerToReceiveVideo: 1
     };
 
