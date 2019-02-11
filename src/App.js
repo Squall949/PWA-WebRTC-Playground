@@ -54,7 +54,7 @@ class App extends Component {
     const iceCandidate = event.candidate;
   
     if (iceCandidate) {
-      this.serverConnection.sendUTF(JSON.stringify({'ice': iceCandidate}));
+      this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
       console.log('send iceCandidate');
     }
   }
@@ -74,7 +74,7 @@ class App extends Component {
 
   createDescription = (description) => {
     this.peerConnection.setLocalDescription(description).then(() => {
-      this.serverConnection.sendUTF(JSON.stringify({'sdp': this.peerConnection.localDescription}));
+      this.serverConnection.send(JSON.stringify({'sdp': this.peerConnection.localDescription}));
       console.log('send description');
     }).catch(this.errorHandler);
   }
@@ -116,7 +116,7 @@ class App extends Component {
   handleStopClick = () => {
     this.dismiss();
 
-    this.serverConnection.sendUTF(JSON.stringify({'dismiss': ''}));
+    this.serverConnection.send(JSON.stringify({'dismiss': ''}));
     console.log('send dismiss');
   }
 
