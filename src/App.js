@@ -6,6 +6,8 @@ import {saveStream} from './utility';
 class App extends Component {
   peerConnection;
   serverConnection;
+  localVideo = React.createRef();
+  remoteVideo = React.createRef();
 
   constructor() {
     super();
@@ -13,6 +15,8 @@ class App extends Component {
   }
 
   componentDidMount() {
+    this.initWebsocketConn(true);
+    
     navigator.mediaDevices.getUserMedia({
       audio: false,
       video: true
@@ -29,7 +33,7 @@ class App extends Component {
       saveStream(stream);
 
     this.setState({localStream: stream});
-    this.localVideo.srcObject = stream;
+    this.localVideo.current.srcObject = stream;
 
     this.initPeerConnection();
   }
@@ -64,7 +68,7 @@ class App extends Component {
     const iceCandidate = event.candidate;
   
     if (iceCandidate) {
-      this.serverConnection.onopen = () => this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
+      this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
       console.log('send iceCandidate');
     }
   }
@@ -73,15 +77,11 @@ class App extends Component {
     this.setState({isStartDisabled: true});
     this.setState({isHangUpDisabled: false});
 
-    this.initWebsocketConn(true);
-
     const offerOptions = {
       offerToReceiveVideo: 1
     };
 
-    this.serverConnection.onopen = () => {
-      this.peerConnection.createOffer(offerOptions).then(this.createDescription).catch(this.errorHandler);
-    }
+    this.peerConnection.createOffer(offerOptions).then(this.createDescription).catch(this.errorHandler);
   }
 
   createDescription = (description) => {
@@ -96,8 +96,6 @@ class App extends Component {
   }
 
   gotMessageFromServer = (message) => {
-    if(!this.peerConnection) this.initPeerConnection();
-    console.log(message);
     const signal = JSON.parse(message.data);
   
     if(signal.sdp) {
@@ -117,20 +115,18 @@ class App extends Component {
     }
     else {
       this.dismiss();
-      console.log('receive dismiss');
     }
   }
 
   gotRemoteStream = (event) => {
     console.log(event);
-    this.remoteVideo.srcObject = event.streams[0];
+    this.remoteVideo.current.srcObject = event.streams[0];
   }
 
   handleStopClick = () => {
     this.dismiss();
 
     this.serverConnection.send(JSON.stringify({'dismiss': ''}));
-    console.log('send dismiss');
   }
 
   handleRadioChange = (event) => {
@@ -158,8 +154,8 @@ class App extends Component {
           To get started, edit <code>src/App.js</code> and save to reload.
         </p> */}
         <div className="App-videos">
-          <video id="localVideo" autoPlay playsInline ref={video => {this.localVideo = video}}></video>
-          <video id="remoteVideo" autoPlay playsInline ref={video => {this.remoteVideo = video}}></video>
+          <video id="localVideo" autoPlay playsInline ref={this.localVideo}></video>
+          <video id="remoteVideo" autoPlay playsInline ref={this.remoteVideo}></video>
         </div>
 
         <div>
