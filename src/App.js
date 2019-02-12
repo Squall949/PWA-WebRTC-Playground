@@ -121,6 +121,7 @@ class App extends Component {
   gotRemoteStream = (event) => {
     console.log(event);
     // this.remoteVideo.current.srcObject = event.streams[0];
+    this.setState({localStream: event.streams[0]});
     this.remoteVideo.current.srcObject = this.state.localStream;
   }
 
