@@ -154,8 +154,8 @@ class App extends Component {
           To get started, edit <code>src/App.js</code> and save to reload.
         </p> */}
         <div className="App-videos">
-          <video id="localVideo" autoPlay playsInline ref={this.localVideo}></video>
-          <video id="remoteVideo" autoPlay playsInline ref={this.remoteVideo}></video>
+          <video id="localVideo" autoPlay ref={this.localVideo}></video>
+          <video id="remoteVideo" autoPlay ref={this.remoteVideo}></video>
         </div>
 
         <div>
