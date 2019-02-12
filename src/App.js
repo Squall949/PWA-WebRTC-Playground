@@ -40,14 +40,15 @@ class App extends Component {
   }
 
   initWebsocketConn = (isCaller) => {
-    // if (isCaller) {
-      this.serverConnection = new WebSocket('ws://localhost:8000/object/webrtcviaflowchain/send');
-    // }
-    // else {
-    //   this.serverConnection = new WebSocket('ws://localhost:8000/object/webrtcviaflowchain/viewer');
-    // }
+    if (isCaller) {
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/caller/send');
+      this.viewerConn = new WebSocket('ws://localhost:8000/object/callee/viewer');
+    }
+    else {
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/callee/send');
+      this.viewerConn = new WebSocket('ws://localhost:8000/object/caller/viewer');
+    }
 
-    this.viewerConn = new WebSocket('ws://localhost:8000/object/webrtcviaflowchain/viewer');
     this.viewerConn.onmessage = this.gotMessageFromServer;
   }
 
@@ -131,10 +132,10 @@ class App extends Component {
     this.serverConnection.send(JSON.stringify({'dismiss': ''}));
   }
 
-  // handleRadioChange = (event) => {
-  //   console.log(event.currentTarget.value);
-  //   this.initWebsocketConn((event.currentTarget.value === 'caller') ? true : false);
-  // }
+  handleRadioChange = (event) => {
+    console.log(event.currentTarget.value);
+    this.initWebsocketConn((event.currentTarget.value === 'caller') ? true : false);
+  }
 
   dismiss = () => {
     this.peerConnection.close();
@@ -160,10 +161,10 @@ class App extends Component {
           <video id="remoteVideo" autoPlay playsInline ref={this.remoteVideo}></video>
         </div>
 
-        {/* <div>
+        <div>
           <input type="radio" id="caller" name="role" value="caller" onChange={this.handleRadioChange}></input><label htmlFor="caller">caller</label>
           <input type="radio" id="viewer" name="role" value="viewer" onChange={this.handleRadioChange}></input><label htmlFor="viewer">viewer</label>
-        </div> */}
+        </div>
 
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>
