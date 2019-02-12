@@ -13,9 +13,6 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.serverConnection = new WebSocket(`ws://${window.location.hostname}:8000`);
-    this.serverConnection.onmessage = this.gotMessageFromServer;
-
     navigator.mediaDevices.getUserMedia({
       audio: false,
       video: true
@@ -35,7 +32,16 @@ class App extends Component {
     this.localVideo.srcObject = stream;
   }
 
-  initPeerConnection = () =>{
+  initPeerConnection = (isCaller) =>{
+    if (isCaller) {
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/caller/send');
+    }
+    else {
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/receiver/viewer');
+    }
+    
+    this.serverConnection.onmessage = this.gotMessageFromServer;
+
     const peerConnectionConfig = {
       'iceServers': [
         {'urls': 'stun:stun.stunprotocol.org:3478'},
@@ -53,7 +59,7 @@ class App extends Component {
   handleConnection = (event) => {
     const iceCandidate = event.candidate;
   
-    if (iceCandidate) {
+    if (iceCandidate && this.serverConnection.readyState === 1) {
       this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
       console.log('send iceCandidate');
     }
@@ -63,13 +69,15 @@ class App extends Component {
     this.setState({isStartDisabled: true});
     this.setState({isHangUpDisabled: false});
 
-    this.initPeerConnection();
+    this.initPeerConnection(true);
 
     const offerOptions = {
       offerToReceiveVideo: 1
     };
 
-    this.peerConnection.createOffer(offerOptions).then(this.createDescription).catch(this.errorHandler);
+    this.serverConnection.onopen = () => {
+      this.peerConnection.createOffer(offerOptions).then(this.createDescription).catch(this.errorHandler);
+    }
   }
 
   createDescription = (description) => {
@@ -84,7 +92,7 @@ class App extends Component {
   }
 
   gotMessageFromServer = (message) => {
-    if(!this.peerConnection) this.initPeerConnection();
+    if(!this.peerConnection) this.initPeerConnection(false);
     console.log(message);
     const signal = JSON.parse(message.data);
   
