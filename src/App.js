@@ -27,11 +27,6 @@ class App extends Component {
     });
   }
 
-  componentDidUpdate() {
-    if (this.state.remoteStream && this.remoteVideo.current.srcObject !== this.state.remoteStream)
-      this.remoteVideo.current.srcObject = this.state.remoteStream;
-  }  
-
   handleSuccess = (stream) => {
     // when user is offline, recording the stream
     if (!window.navigator.onLine)
@@ -125,7 +120,8 @@ class App extends Component {
 
   gotRemoteStream = (event) => {
     console.log(event);
-    this.setState({remoteStream: event.streams[0]});
+    // this.remoteVideo.current.srcObject = event.streams[0];
+    this.remoteVideo.current.srcObject = this.state.localStream;
   }
 
   handleStopClick = () => {
