@@ -58,7 +58,7 @@ class App extends Component {
     };
     this.peerConnection = new RTCPeerConnection(peerConnectionConfig);
     this.peerConnection.addEventListener('icecandidate', this.handleConnection);
-    this.peerConnection.addEventListener('addstream', this.gotRemoteStream);
+    this.peerConnection.addEventListener('track', this.gotRemoteStream);
     this.peerConnection.addStream(this.state.localStream);
 
     console.log('init peerConn');
@@ -120,7 +120,9 @@ class App extends Component {
 
   gotRemoteStream = (event) => {
     console.log(event);
-    this.remoteVideo.current.srcObject = event.stream;
+    // this.remoteVideo.current.srcObject = event.streams[0];
+    this.setState({localStream: event.streams[0]});
+    this.localVideo.current.srcObject = this.state.localStream;
   }
 
   handleStopClick = () => {
