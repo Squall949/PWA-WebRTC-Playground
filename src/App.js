@@ -28,7 +28,8 @@ class App extends Component {
   }
 
   componentDidUpdate() {
-    this.remoteVideo.current.srcObject = this.state.remoteStream;
+    if (this.remoteVideo.current.srcObject !== this.state.remoteStream)
+      this.remoteVideo.current.srcObject = this.state.remoteStream;
   }  
 
   handleSuccess = (stream) => {
