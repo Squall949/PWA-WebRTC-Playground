@@ -16,7 +16,7 @@ class App extends Component {
   }
 
   componentDidMount() {
-    this.initWebsocketConn();
+    this.initWebsocketConn(true);
     
     navigator.mediaDevices.getUserMedia({
       audio: false,
