@@ -11,7 +11,7 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isHangUpDisabled: true, localStream: undefined};
+    this.state = {isStartDisabled: false, isHangUpDisabled: true, localStream: undefined, remoteStream: undefined};
   }
 
   componentDidMount() {
@@ -27,6 +27,10 @@ class App extends Component {
     });
   }
 
+  componentDidUpdate() {
+    this.remoteVideo.current.srcObject = this.state.remoteStream;
+  }  
+
   handleSuccess = (stream) => {
     // when user is offline, recording the stream
     if (!window.navigator.onLine)
@@ -34,7 +38,6 @@ class App extends Component {
 
     this.setState({localStream: stream});
     this.localVideo.current.srcObject = stream;
-    this.remoteVideo.current.srcObject = stream;
 
     this.initPeerConnection();
   }
@@ -121,7 +124,7 @@ class App extends Component {
 
   gotRemoteStream = (event) => {
     console.log(event);
-    this.remoteVideo.current.srcObject = event.streams[0];
+    this.setState({remoteStream: event.streams[0]});
   }
 
   handleStopClick = () => {
@@ -140,6 +143,7 @@ class App extends Component {
     this.peerConnection = undefined;
 
     this.setState({localStream: undefined});
+    this.setState({remoteStream: undefined});
     this.setState({isStartDisabled: false});
     this.setState({isHangUpDisabled: true});
   }
