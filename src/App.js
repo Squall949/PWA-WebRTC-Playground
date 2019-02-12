@@ -95,6 +95,7 @@ class App extends Component {
   }
 
   gotMessageFromServer = (message) => {
+    if(!this.peerConnection) this.initPeerConnection();
     console.log(message);
     const signal = JSON.parse(message.data);
   
