@@ -30,6 +30,8 @@ class App extends Component {
 
     this.setState({localStream: stream});
     this.localVideo.srcObject = stream;
+
+    this.initPeerConnection();
   }
 
   initWebsocketConn = (isCaller) => {
@@ -61,8 +63,8 @@ class App extends Component {
   handleConnection = (event) => {
     const iceCandidate = event.candidate;
   
-    if (iceCandidate && this.serverConnection.readyState === 1) {
-      this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
+    if (iceCandidate) {
+      this.serverConnection.onopen = () => this.serverConnection.send(JSON.stringify({'ice': iceCandidate}));
       console.log('send iceCandidate');
     }
   }
@@ -72,7 +74,6 @@ class App extends Component {
     this.setState({isHangUpDisabled: false});
 
     this.initWebsocketConn(true);
-    this.initPeerConnection();
 
     const offerOptions = {
       offerToReceiveVideo: 1
@@ -110,6 +111,7 @@ class App extends Component {
     } 
     else if(signal.ice) {
       this.peerConnection.addIceCandidate(new RTCIceCandidate(signal.ice)).catch(this.errorHandler);
+      console.log('add iceCandidate');
       this.setState({isStartDisabled: true});
       this.setState({isHangUpDisabled: false});
     }
