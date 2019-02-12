@@ -32,16 +32,18 @@ class App extends Component {
     this.localVideo.srcObject = stream;
   }
 
-  initPeerConnection = (isCaller) =>{
+  initWebsocketConn = (isCaller) => {
     if (isCaller) {
-      this.serverConnection = new WebSocket('ws://localhost:8000/object/caller/send');
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/webrtcviaflowchain/send');
     }
     else {
-      this.serverConnection = new WebSocket('ws://localhost:8000/object/receiver/viewer');
+      this.serverConnection = new WebSocket('ws://localhost:8000/object/webrtcviaflowchain/viewer');
     }
-    
-    this.serverConnection.onmessage = this.gotMessageFromServer;
 
+    this.serverConnection.onmessage = this.gotMessageFromServer;
+  }
+
+  initPeerConnection = () => {
     const peerConnectionConfig = {
       'iceServers': [
         {'urls': 'stun:stun.stunprotocol.org:3478'},
@@ -69,7 +71,8 @@ class App extends Component {
     this.setState({isStartDisabled: true});
     this.setState({isHangUpDisabled: false});
 
-    this.initPeerConnection(true);
+    this.initWebsocketConn(true);
+    this.initPeerConnection();
 
     const offerOptions = {
       offerToReceiveVideo: 1
@@ -92,7 +95,6 @@ class App extends Component {
   }
 
   gotMessageFromServer = (message) => {
-    if(!this.peerConnection) this.initPeerConnection(false);
     console.log(message);
     const signal = JSON.parse(message.data);
   
@@ -128,6 +130,11 @@ class App extends Component {
     console.log('send dismiss');
   }
 
+  handleRadioChange = (event) => {
+    console.log(event.currentTarget.value);
+    this.initWebsocketConn((event.currentTarget.value === 'caller') ? true : false);
+  }
+
   dismiss = () => {
     this.peerConnection.close();
     this.peerConnection = undefined;
@@ -150,6 +157,11 @@ class App extends Component {
         <div className="App-videos">
           <video id="localVideo" autoPlay playsInline ref={video => {this.localVideo = video}}></video>
           <video id="remoteVideo" autoPlay playsInline ref={video => {this.remoteVideo = video}}></video>
+        </div>
+
+        <div>
+          <input type="radio" id="caller" name="role" value="caller" onChange={this.handleRadioChange}></input><label htmlFor="caller">caller</label>
+          <input type="radio" id="viewer" name="role" value="viewer" onChange={this.handleRadioChange}></input><label htmlFor="viewer">viewer</label>
         </div>
 
         <div className="App-action-btns">
