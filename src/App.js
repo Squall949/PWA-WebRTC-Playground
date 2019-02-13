@@ -12,7 +12,7 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isHangUpDisabled: true, localStream: undefined};
+    this.state = {isStartDisabled: false, isViewDisabled: false, isHangUpDisabled: true, localStream: undefined};
   }
 
   componentDidMount() {
@@ -35,8 +35,6 @@ class App extends Component {
 
     this.setState({localStream: stream});
     this.localVideo.current.srcObject = stream;
-
-    this.initPeerConnection();
   }
 
   initWebsocketConn = (isCaller) => {
@@ -76,9 +74,10 @@ class App extends Component {
     }
   }
 
+  // start to connect
   handleStartClick = () => {
-    this.setState({isStartDisabled: true});
-    this.setState({isHangUpDisabled: false});
+    this.initPeerConnection();
+    this.controlBtnStates();
 
     const offerOptions = {
       offerToReceiveVideo: 1
@@ -113,8 +112,6 @@ class App extends Component {
     else if(signal.ice) {
       this.peerConnection.addIceCandidate(new RTCIceCandidate(signal.ice)).catch(this.errorHandler);
       console.log('add iceCandidate');
-      this.setState({isStartDisabled: true});
-      this.setState({isHangUpDisabled: false});
     }
     else {
       this.dismiss();
@@ -132,17 +129,29 @@ class App extends Component {
     this.serverConnection.send(JSON.stringify({'dismiss': ''}));
   }
 
-  handleRadioChange = (event) => {
-    console.log(event.currentTarget.value);
-    this.initWebsocketConn((event.currentTarget.value === 'caller') ? true : false);
+  // handleRadioChange = (event) => {
+  //   console.log(event.currentTarget.value);
+  //   this.initWebsocketConn((event.currentTarget.value === 'caller') ? true : false);
+  // }
+
+  handleViewClick = () => {
+    this.initWebsocketConn(false);
+    this.initPeerConnection();
+    this.controlBtnStates();
+  }
+
+  controlBtnStates = () => {
+    this.setState({isStartDisabled: true});
+    this.setState({isViewDisabled: true});
+    this.setState({isHangUpDisabled: false});
   }
 
   dismiss = () => {
     this.peerConnection.close();
     this.peerConnection = undefined;
 
-    this.setState({localStream: undefined});
     this.setState({isStartDisabled: false});
+    this.setState({isViewDisabled: false});
     this.setState({isHangUpDisabled: true});
   }
 
@@ -161,13 +170,14 @@ class App extends Component {
           <video id="remoteVideo" autoPlay playsInline ref={this.remoteVideo}></video>
         </div>
 
-        <div>
+        {/* <div>
           <input type="radio" id="caller" name="role" value="caller" onChange={this.handleRadioChange}></input><label htmlFor="caller">caller</label>
           <input type="radio" id="viewer" name="role" value="viewer" onChange={this.handleRadioChange}></input><label htmlFor="viewer">viewer</label>
-        </div>
+        </div> */}
 
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>
+          <button id="viewButton" className="actionButton" onClick={this.handleViewClick} disabled={this.state.isViewDisabled}>View</button>
           <button id="hangupButton" className="actionButton" onClick={this.handleStopClick} disabled={this.state.isHangUpDisabled}>Hang Up</button>
         </div>
       </div>
