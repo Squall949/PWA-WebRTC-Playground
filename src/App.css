@@ -24,7 +24,7 @@
 
 video {
   height: 300px;
-  width: 50vw;
+  max-width: 50vw;
 }
 
 .App-videos {
@@ -53,4 +53,8 @@ video {
 @keyframes App-logo-spin {
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
+}
+
+.text-left {
+  text-align: left;
 }

@@ -12,7 +12,7 @@ class App extends Component {
 
   constructor() {
     super();
-    this.state = {isStartDisabled: false, isViewDisabled: false, isHangUpDisabled: true, localStream: undefined};
+    this.state = {isStartDisabled: false, isViewDisabled: false, isHangUpDisabled: true, localStream: undefined, isIPFS: true};
   }
 
   componentDidMount() {
@@ -29,10 +29,6 @@ class App extends Component {
   }
 
   handleSuccess = (stream) => {
-    // when user is offline, recording the stream
-    if (!window.navigator.onLine)
-      saveStream(stream);
-
     this.setState({localStream: stream});
     this.localVideo.current.srcObject = stream;
   }
@@ -76,6 +72,10 @@ class App extends Component {
 
   // start to connect
   handleStartClick = () => {
+    // when user is offline, recording the stream
+    // if (!window.navigator.onLine)
+      saveStream(this.state.localStream, this.state.isIPFS);
+
     this.initPeerConnection();
     this.controlBtnStates();
 
@@ -155,6 +155,10 @@ class App extends Component {
     this.setState({isHangUpDisabled: true});
   }
 
+  handleStorageChange = (event) => {
+    this.setState({isIPFS: (event.currentTarget.value === 'ipfs') ? true : false});
+  }
+
   render() {
     return (
       <div className="App">
@@ -170,10 +174,13 @@ class App extends Component {
           <video id="remoteVideo" autoPlay playsInline ref={this.remoteVideo}></video>
         </div>
 
-        {/* <div>
-          <input type="radio" id="caller" name="role" value="caller" onChange={this.handleRadioChange}></input><label htmlFor="caller">caller</label>
-          <input type="radio" id="viewer" name="role" value="viewer" onChange={this.handleRadioChange}></input><label htmlFor="viewer">viewer</label>
-        </div> */}
+        <div className="text-left">
+          <label>Save offline video to:</label>
+        </div>
+        <div className="text-left">
+          <input type="radio" id="firebase" name="storage" value="firebase" onChange={this.handleStorageChange}></input><label htmlFor="caller">Firebase</label>
+          <input type="radio" id="ipfs" name="storage" value="ipfs" checked onChange={this.handleStorageChange}></input><label htmlFor="caller">IPFS</label>
+        </div>
 
         <div className="App-action-btns">
           <button id="startButton" className="actionButton" onClick={this.handleStartClick} disabled={this.state.isStartDisabled}>Start</button>

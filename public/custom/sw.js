@@ -1,6 +1,9 @@
 self.addEventListener('sync', function (event) {
     if (event.tag == 'save-stream') {
-        event.waitUntil(self.dbAccess.saveToFirebase());
+      event.waitUntil(self.dbAccess.saveToFirebase());
+    }
+    else if (event.tag == 'save-ipfs') {
+      event.waitUntil(self.dbAccess.saveToIPFS());
     }
 });
 

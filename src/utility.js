@@ -1,4 +1,4 @@
-function saveStream(stream) {
+function saveStream(stream, isIPFS) {
     const options = {mimeType: 'video/webm'};
     const recordedChunks = [];
     const mediaRecorder = new MediaRecorder(stream, options);
@@ -15,11 +15,26 @@ function saveStream(stream) {
             window.dbAccess.writeData('stream', {id: 'tmpRecord', stream: new Blob(recordedChunks)})
             .then(() => {
                 // trigger sw's sync event
-                if('serviceWorker' in navigator && 'SyncManager' in window){
-                    navigator.serviceWorker.ready.then(function(swRegistration) {
-                        swRegistration.sync.register('save-stream');
-                    });
-                }
+                // if('serviceWorker' in navigator && 'SyncManager' in window){
+                //     navigator.serviceWorker.ready.then(function(swRegistration) {
+                        if (isIPFS) {
+                            // swRegistration.sync.register('save-ipfs');
+                            console.log('isIPFS ' + isIPFS);
+                            let form = new FormData();
+                            form.append('stream', new Blob(recordedChunks));
+
+                            fetch('/savetoipfs', {
+                                method: 'POST',
+                                body: form
+                            }).then(response => {
+                        
+                            });
+                        }
+                        else {
+                            // swRegistration.sync.register('save-stream');
+                        }
+                //     });
+                // }
             });
         }
     });  

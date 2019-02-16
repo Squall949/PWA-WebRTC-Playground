@@ -2,6 +2,7 @@
   "name": "pwawebrtc",
   "version": "0.1.1",
   "private": true,
+  "proxy": "http://localhost:8800",
   "dependencies": {
     "merge": "^1.2.1",
     "react": "^16.8.1",

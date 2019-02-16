@@ -30,7 +30,6 @@
                     firebase.storage().ref().child('stream.mp4').put(data[0].stream, { contentType : 'video/mp4' }).then(function(snapshot) {
                         console.log('Uploaded a blob!');
                         // Generating Push Message
-                        var functions = firebase.functions();
                         var doPush = firebase.functions().httpsCallable('doPush');
                         
                         doPush().then(function(result) {
@@ -39,6 +38,21 @@
                         .catch(function(error) {
                             console.log(error);
                         });
+                    });
+                }
+            });
+        },
+        saveToIPFS: function() {
+            this.readData('stream').then(function(data) {
+                if (data && data.length) {
+                    let form = new FormData();
+                    form.append('stream.mp4', data[0].stream);
+
+                    fetch('/savetoipfs', {
+                        method: 'POST',
+                        body: form
+                    }).then(response => {
+                        
                     });
                 }
             });
